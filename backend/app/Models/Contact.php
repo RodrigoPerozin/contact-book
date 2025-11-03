@@ -10,7 +10,7 @@ class Contact extends Model
     use HasFactory;
 
     // Nome da tabela (opcional, só se não seguir o padrão 'contacts')
-    // protected $table = 'contacts';
+    protected $table = 'contacts';
 
     // Campos que podem ser preenchidos em massa
     protected $fillable = [
@@ -18,8 +18,12 @@ class Contact extends Model
         'email',
         'phone',
         'cep',
-        'address1',
-        'address2',
+        'city',
+        'country',
+        'neighborhood',
+        'street_address',
+        'house_number',
+        'complement',
     ];
 
     // Conversões de tipos automáticas

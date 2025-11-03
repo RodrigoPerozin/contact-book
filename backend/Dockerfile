@@ -14,6 +14,7 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+RUN chown -R www-data:www-data database &&  chmod -R 775 database
 
 # NÃO expor porta do artisan
 # Expor a porta padrão do PHP-FPM (9000)
