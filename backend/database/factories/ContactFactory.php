@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Contact;
-use Faker\Extension\AddressExtension;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Contact>
@@ -23,6 +22,10 @@ class ContactFactory extends Factory
      */
     public function definition(): array
     {
+
+        $path = public_path('images/default-user.png');
+        $defaultImage = base64_encode(file_get_contents($path));
+
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
@@ -34,6 +37,7 @@ class ContactFactory extends Factory
             'street_address' => $this->faker->streetAddress(),
             'house_number' => $this->faker->numberBetween(1, 99999),
             'complement' => $this->faker->randomLetter(),
+            'picture' => $defaultImage
         ];
     }
 }

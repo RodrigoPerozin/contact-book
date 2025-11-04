@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('street_address')->nullable();
             $table->string('house_number')->nullable();
             $table->string('complement')->nullable();
+            $table->string('picture')->nullable();
             $table->timestamps();
         });
     }

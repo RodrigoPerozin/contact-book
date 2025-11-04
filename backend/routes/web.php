@@ -1,36 +1,16 @@
 <?php
 
+use App\Http\Controllers\ContactsController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use App\Models\Contact;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/api/contact', function () {
-    return Contact::all();
-});
-
-
-Route::post('/api/contact', function (Request $request) {
-    $data = $request->validate([
-        'name'           => 'required|string|max:255',
-        'email'          => 'required|email|unique:contacts,email',
-        'phone'          => 'nullable|string|max:20',
-        'cep'            => 'nullable|string|max:10',
-        'city'           => 'nullable|string|max:100',
-        'country'        => 'nullable|string|max:100',
-        'neighborhood'   => 'nullable|string|max:100',
-        'street_address' => 'nullable|string|max:255',
-        'house_number'   => 'nullable|string|max:20',
-        'complement'     => 'nullable|string|max:255',
-    ]);
-
-    $contact = Contact::create($data);
-
-    return response()->json([
-        'message' => 'Contact created successfully',
-        'contact' => $contact,
-    ], 201);
+Route::controller(ContactsController::class)->group(function () {
+    Route::get('/api/contact', 'find'); // Get all contacts with optional filters and pagination
+    Route::delete('/api/contact/{id}', 'delete'); // Delete a contact by ID
+    Route::post('/api/contact', 'create'); // Create a new contact
+    Route::put('/api/contact/{id}', 'update'); // Update a contact by ID
+    Route::get('/api/contact/default-picture', 'defaultPicture'); // Get default contact picture
 });

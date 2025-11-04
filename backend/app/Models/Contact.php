@@ -24,6 +24,7 @@ class Contact extends Model
         'street_address',
         'house_number',
         'complement',
+        'picture'
     ];
 
     // Conversões de tipos automáticas
