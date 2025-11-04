@@ -16,8 +16,7 @@ class ContactSeeder extends Seeder
         Contact::factory()->count(20)->create();
 
         // Se você quiser criar manualmente alguns contatos específicos:
-        
-        Contact::create([
+        /*Contact::create([
             'name' => 'Rodrigo D. Perozin',
             'email' => 'rodrigo@example.com',
             'phone' => '+55 47 99999-9999',
@@ -28,6 +27,6 @@ class ContactSeeder extends Seeder
             'street_address' => 'Rua Exemplo',
             'house_number' => '123',
             'complement' => 's',
-        ]);
+        ]);*/
     }
 }

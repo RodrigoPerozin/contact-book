@@ -11,17 +11,24 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data database &&  chmod -R 775 database
+# Cria arquivo SQLite se não existir, e define permissões corretas
+RUN mkdir -p database \
+    && touch database/database.sqlite \
+    && chmod -R 775 storage bootstrap/cache database \
+    && chmod 664 database/database.sqlite
+
+# Copia entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # NÃO expor porta do artisan
 # Expor a porta padrão do PHP-FPM (9000)
 EXPOSE 9000
 
 #Força a sempre fazer as migrações ao iniciar o container
-CMD bash -c "php artisan migrate --force"
 
-# Rodar PHP-FPM
+# Usa entrypoint
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Executa PHP-FPM
 CMD ["php-fpm"]

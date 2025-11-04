@@ -20,18 +20,24 @@ Welcome to the Contact Book project! This is a simple and efficient contact mana
 To start the application in development, run:
 
 ```bash
-docker compose -p contact-book up -d -p
+docker compose -p contact-book-backend up -d --build
 ```
 Now development application is running on port 8000 (http:localhost:8000/).
 
 To start the application in production, run:
 
 ```bash
-docker compose -f docker-compose.prod.yml -p contact-book up up -d --build
+docker compose -f docker-compose.prod.yml -p contact-book-backend up -d --build
 ```
 Now development application is running on port 80 (http:localhost/).
 
 The application will be available at the configured port.
+
+## Command to create fake data on database (run inside API docker container):
+
+```bash
+php artisan db:seed
+```
 
 ### Environment Variables
 
