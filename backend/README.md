@@ -17,6 +17,8 @@ Welcome to the Contact Book project! This is a simple and efficient contact mana
 
 ### Running the Project
 
+First of all, <b>if not exist</b>, create the database.sqlite on database folder.
+
 To start the application in development, run:
 
 ```bash
