@@ -32,7 +32,7 @@ Este projeto Vue.js está configurado para rodar em **ambientes de desenvolvimen
 O ambiente de desenvolvimento permite **hot-reload**, ou seja, alterações no código são refletidas automaticamente no navegador.
 
 ```bash
-docker-compose -f docker-compose.dev.yml -p contact-book-backend up -d --build
+docker-compose -f docker-compose.dev.yml -p contact-book-frontend up -d --build
 ```
 ## Rodando em Produção
 

@@ -1,11 +1,11 @@
-version: "3.9"
-
 services:
   vue-app:
     build:
       context: .
       dockerfile: Dockerfile.dev
     container_name: contact-book-frontend
+    networks:
+      - contact-book-frontend
     ports:
       - "5173:5173"
     volumes:
@@ -13,3 +13,6 @@ services:
       - /app/node_modules
     stdin_open: true
     tty: true
+networks:
+  contact-book-frontend:
+    driver: bridge

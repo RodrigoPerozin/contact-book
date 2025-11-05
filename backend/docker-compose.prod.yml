@@ -2,6 +2,8 @@ services:
   api:
     build: .
     container_name: contact-book-api
+    networks:
+      - contact-book-backend
     working_dir: /var/www/html
     volumes:
       - .:/var/www/html
@@ -17,6 +19,8 @@ services:
   nginx:
     image: nginx:alpine
     container_name: contact-book-nginx
+    networks:
+      - contact-book-backend
     ports:
       - "8000:8000"
     volumes:
@@ -28,6 +32,11 @@ services:
   sqlite:
     image: nouchka/sqlite3
     container_name: contact-book-sqlite
+    networks:
+      - contact-book-backend
     volumes:
       - ./database/database.sqlite:/root/db.sqlite
     tty: true
+networks:
+  contact-book-backend:
+    driver: bridge
