@@ -510,24 +510,26 @@
                   style="border-radius: 50%;object-fit: cover; width: 10rem; min-width: 10rem;aspect-ratio: 1 / 1;"
                 />
               </div>
-              <div name="Info Contact" style="width:88%;">
-                <h5 class="card-title">{{ contact.name }}</h5>
-                <p class="mb-0">E-mail: {{ contact.email }}</p>
-                <p class="mb-0 text-wrap">
-                  {{ (contact.country ? contact.country : '') + (contact.country ? ' - ':'') + 
-                    ((contact.cep && contact.cep != null) ? ('CEP '+contact.cep) : '') + (contact.cep ? ' - ':'') +
-                    (contact.state ? contact.state : '') + (contact.state ? ' - ':'') + 
-                    (contact.city ? contact.city : '') + (contact.city ? ' - ':'') +
-                    (contact.neighborhood ? contact.neighborhood : '') + (contact.neighborhood ? ' - ':'') +
-                    (contact.street_address ? contact.street_address : '') + (contact.street_address ? ' - ':'') +
-                    (contact.house_number ? contact.house_number : '') + (contact.house_number ? ' - ':'') +
-                    (contact.complement ? contact.complement : '') + (contact.complement ? '':'')}}
-                </p>
-                <p>
-                  {{ 
-                    'Contato: '+(contact.phone ? contact.phone : '') 
-                  }}
-                </p>
+              <div name="Info Contact" class="d-flex flex-column justify-content-between" style="width:88%;">
+                <div>
+                  <h5 class="card-title">{{ contact.name }}</h5>
+                  <p class="mb-0">E-mail: {{ contact.email }}</p>
+                  <p class="mb-0 text-wrap">
+                    {{ (contact.country ? contact.country : '') + (contact.country ? ' - ':'') + 
+                      ((contact.cep && contact.cep != null) ? ('CEP '+contact.cep) : '') + (contact.cep ? ' - ':'') +
+                      (contact.state ? contact.state : '') + (contact.state ? ' - ':'') + 
+                      (contact.city ? contact.city : '') + (contact.city ? ' - ':'') +
+                      (contact.neighborhood ? contact.neighborhood : '') + (contact.neighborhood ? ' - ':'') +
+                      (contact.street_address ? contact.street_address : '') + (contact.street_address ? ' - ':'') +
+                      (contact.house_number ? contact.house_number : '') + (contact.house_number ? ' - ':'') +
+                      (contact.complement ? contact.complement : '') + (contact.complement ? '':'')}}
+                  </p>
+                  <p>
+                    {{ 
+                      (contact.phone ? ('Contato: '+contact.phone) : " ") 
+                    }}
+                  </p>
+                </div>
                 <div class="w-100 d-flex text-end justify-content-end gap-2 adjust-justify-small-devices">
                   <a class="btn btn-secondary" @click="openModal(ACTION.edit, contact.id)">Alterar</a>
                   <a class="btn btn-danger" @click="deleteContact(contact.id)">Remover</a>
