@@ -43,6 +43,7 @@ Pré-requisitos: PHP, Composer, Node.js, NPM/Yarn, MySQL (ou outro SQL)
     ```
 
 4. Acessar a interface no navegador (porta conforme configuração)
+5. O backend no docker pode levar até 1min para subir.
 
 ## Estrutura principal
 - /backend — aplicação Laravel, rotas API, controllers, migrations
