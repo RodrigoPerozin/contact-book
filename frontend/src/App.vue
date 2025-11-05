@@ -146,7 +146,7 @@
     }
 
     showAlert('Sucesso!', data.message, 'success');
-    loadContacts()
+    updateContactList()
     fecharModal();  
   }  
 
@@ -211,7 +211,7 @@
         if(contact.email) email.value = contact.email;
         if(contact.phone) phone.value = contact.phone;
         if(contact.country) country.value = contact.country;
-        if(contact.cep) cep.value = String(contact.cep);
+        if(contact.cep !== null) cep.value = String(contact.cep);
         if(contact.state) state.value = contact.state;
         if(contact.city) city.value = contact.city;
         if(contact.neighborhood) neighborhood.value = contact.neighborhood;
@@ -254,8 +254,7 @@
       }
 
       showAlert('Sucesso!', data.message, 'success');
-      await loadContacts();
-
+      updateContactList()
     } catch (error: any) {
       showAlert('Erro!', 'Erro inesperado ao excluir contato', 'error');
       console.error('Erro ao excluir contato:', error);
@@ -337,7 +336,7 @@
         name: name.value,
         email: email.value,
         phone: phone.value ?? "",
-        cep: String(cep.value) ?? null,
+        cep: cep.value ? String(cep.value) : '',
         country: country.value ?? "",
         city: city.value ?? "",
         neighborhood: neighborhood.value ?? "",
@@ -380,7 +379,7 @@
       }
 
       showAlert('Sucesso!', data.message, 'success');
-      loadContacts()
+      updateContactList()
       fecharModal();  
     }
   };
@@ -441,7 +440,7 @@
                 </div>
                 <div class="col-md-6">
                   <label for="filterEmail" class="form-label">Email</label>
-                  <input @input="updateContactList" :disabled="formAction === ACTION.edit" type="email" class="form-control" v-model="filter_email" id="filterEmail" placeholder="Email">
+                  <input @input="updateContactList" type="email" class="form-control" v-model="filter_email" id="filterEmail" placeholder="Email">
                 </div>
               </div>
             </div>
@@ -515,13 +514,13 @@
                   <h5 class="card-title">{{ contact.name }}</h5>
                   <p class="mb-0">E-mail: {{ contact.email }}</p>
                   <p class="mb-0 text-wrap">
-                    {{ (contact.country ? contact.country : '') + (contact.country ? ' - ':'') + 
-                      ((contact.cep && contact.cep != null) ? ('CEP '+contact.cep) : '') + (contact.cep ? ' - ':'') +
-                      (contact.state ? contact.state : '') + (contact.state ? ' - ':'') + 
-                      (contact.city ? contact.city : '') + (contact.city ? ' - ':'') +
-                      (contact.neighborhood ? contact.neighborhood : '') + (contact.neighborhood ? ' - ':'') +
-                      (contact.street_address ? contact.street_address : '') + (contact.street_address ? ' - ':'') +
-                      (contact.house_number ? contact.house_number : '') + (contact.house_number ? ' - ':'') +
+                    {{ (contact.country ? contact.country : '') + (contact.cep ? ' - ':'') + 
+                      ((contact.cep && contact.cep != null) ? ('CEP '+contact.cep) : '') + (contact.state ? ' - ':'') +
+                      (contact.state ? contact.state : '') + (contact.city ? ' - ':'') + 
+                      (contact.city ? contact.city : '') + (contact.neighborhood ? ' - ':'') +
+                      (contact.neighborhood ? contact.neighborhood : '') + (contact.street_address ? ' - ':'') +
+                      (contact.street_address ? contact.street_address : '') + (contact.house_number ? ' - ':'') +
+                      (contact.house_number ? contact.house_number : '') + (contact.complement ? ' - ':'') +
                       (contact.complement ? contact.complement : '') + (contact.complement ? '':'')}}
                   </p>
                   <p>
