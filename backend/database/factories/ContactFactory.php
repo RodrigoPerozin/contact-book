@@ -28,7 +28,7 @@ class ContactFactory extends Factory
 
         return [
             'name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'email' => $this->faker->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
             'cep' => $this->faker->postcode(),
             'city' => $this->faker->city(),
@@ -38,7 +38,7 @@ class ContactFactory extends Factory
             'street_address' => $this->faker->streetAddress(),
             'house_number' => $this->faker->numberBetween(1, 99999),
             'complement' => $this->faker->randomLetter(),
-            'picture' => $defaultImage
+            'picture' => 'data:image/png;base64,' . $defaultImage
         ];
     }
 }

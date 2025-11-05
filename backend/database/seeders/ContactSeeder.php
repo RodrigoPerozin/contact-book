@@ -12,8 +12,8 @@ class ContactSeeder extends Seeder
      */
     public function run(): void
     {
-        // Cria 20 contatos de exemplo usando a factory
-        Contact::factory()->count(20)->create();
+        // Cria 50 contatos de exemplo usando a factory
+        Contact::factory()->count(50)->create();
 
         // Se você quiser criar manualmente alguns contatos específicos:
         /*Contact::create([

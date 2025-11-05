@@ -12,7 +12,7 @@ class ContactsController
 
             $data = $request->validate([
                 'name'           => 'required|string|max:255',
-                'email'          => 'required|email|unique:contacts,email',
+                'email'          => 'required|email|max:255',
                 'phone'          => 'nullable|string|max:20',
                 'cep'            => 'nullable|string|max:10',
                 'city'           => 'nullable|string|max:100',
@@ -140,7 +140,7 @@ class ContactsController
 
             $data = $request->validate([
                 'name'           => 'sometimes|required|string|max:255',
-                'email'          => 'sometimes|required|email|unique:contacts,email,' . $id,
+                'email'          => 'sometimes|required|email|unique:contacts,' . $id,
                 'phone'          => 'sometimes|nullable|string|max:20',
                 'cep'            => 'sometimes|nullable|string|max:10',
                 'city'           => 'sometimes|nullable|string|max:100',
@@ -149,6 +149,7 @@ class ContactsController
                 'street_address' => 'sometimes|nullable|string|max:255',
                 'house_number'   => 'sometimes|nullable|string|max:20',
                 'complement'     => 'sometimes|nullable|string|max:255',
+                'picture'        => 'sometimes|nullable|string'
             ]);
 
             $contact->update($data);

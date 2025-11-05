@@ -1,65 +1,16 @@
 <script setup lang="ts">
 
-  import { ref, onMounted, computed } from 'vue'
+  import { ref, onMounted} from 'vue'
   import * as bootstrap from 'bootstrap'
-  import VueSelect from "vue3-select-component";
+  import VueSelect from 'vue3-select-component';
   // @ts-ignore: no type declarations for the package style entry
   import "vue3-select-component/styles";
   import Swal from 'sweetalert2';
-
-  interface Country {
-    nome: string
-    fone: string
-    iso: string
-  }
-
-  export interface Contact {
-  id: number;
-  name: string;
-  email: string;
-  phone: string | null;
-  cep: number | string | null;
-  city: string | null;
-  country: string | null;
-  state: string | null;
-  neighborhood: string | null;
-  street_address: string | null;
-  house_number: number | string | null;
-  complement: string | null;
-  picture: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-// 🔗 Estrutura dos links de paginação
-export interface PaginationLink {
-  url: string | null;
-  label: string;
-  page: number | null;
-  active: boolean;
-}
-
-// 📄 Estrutura completa retornada pela API Laravel
-export interface Paginator {
-  current_page: number;
-  data: Contact[];
-  first_page_url: string;
-  from: number | null;
-  last_page: number;
-  last_page_url: string;
-  links: PaginationLink[];
-  next_page_url: string | null;
-  path: string;
-  per_page: number;
-  prev_page_url: string | null;
-  to: number | null;
-  total: number;
-}
-
-class ACTION {
-  static create = 'create';
-  static edit ='edit';
-}
+  import type {Paginator} from './assets/js/interfaces'
+  import {ACTION} from './assets/js/classes'
+  import { countries } from './assets/js/contries'
+  //@ts-ignore: Nothing to declare
+  import PaginatorNav from './components/PaginatorNav.vue';
 
   //----------CREATE/UPDATE FORM-------//
   var modal: bootstrap.Modal
@@ -77,7 +28,18 @@ class ACTION {
   const complement = ref<string|null>('')
   const picture = ref<string|null>(null)
   const state = ref<string|null>('')
-  const countries = ref<Country[]>([])
+  const editingId = ref<number|null>(null)
+  //-----------------------------------//
+
+  //-----------FILTER FIELDS-----------//
+  const filter_country = ref<string|null>(null)
+  const filter_name = ref<string|null>('')
+  const filter_email = ref<string|null>('')
+  const filter_phone = ref<string|null>('')
+  const filter_cep = ref<string|null>('')
+  const filter_city = ref<string|null>('')
+  const filter_street_address = ref<string|null>('')
+  const filter_state = ref<string|null>('')
   //-----------------------------------//
 
   const defaultPicture = ref<string | null>(null);
@@ -100,14 +62,14 @@ class ACTION {
     // supondo que o backend retorne algo como { "image": "data:image/png;base64,..." }
     const data = await response.json();
     defaultPicture.value = data.image; // salva a string base64
-    console.log(defaultPicture)
   } catch (error) {
     console.error('Erro ao buscar imagem:', error);
   }
 }
 
-  async function loadContacts() {
-    var response = await fetch('http://localhost:8000/api/contact', {
+  async function loadContacts(url?: string, filters?: string) {
+
+    var response = await fetch((url ? url : 'http://localhost:8000/api/contact')+(filters ? filters : ''), {
       method: 'GET',
       headers: {
         "Accept": "application/json",
@@ -115,7 +77,6 @@ class ACTION {
       }
     })  
     paginator.value = await response.json();
-    console.log(paginator.value)
   }
 
   function cleanFormData(){
@@ -129,9 +90,10 @@ class ACTION {
     complement.value = null
     picture.value = null
     state.value = null
-    countries.value = []
     email.value = null
     phone.value = null
+    let formModalPicture = document.querySelector("#formModalPicture") as HTMLInputElement;
+    if(formModalPicture) formModalPicture.value = "";
   }
   
   const create = async() => {
@@ -139,7 +101,7 @@ class ACTION {
       name: name.value,
       email: email.value,
       phone: phone.value ?? "",
-      cep: String(cep.value) ?? "",
+      cep: cep.value ?? null,
       country: country.value ?? "",
       city: city.value ?? "",
       neighborhood: neighborhood.value ?? "",
@@ -237,6 +199,7 @@ class ACTION {
         formAction.value = 'create'
         break
       case ACTION.edit:
+        cleanFormData()
         formAction.value = 'edit'
         break
     }
@@ -255,8 +218,7 @@ class ACTION {
         if(contact.street_address) street_address.value = contact.street_address;
         if(contact.house_number) house_number.value = String(contact.house_number);
         if(contact.complement) complement.value = contact.complement;
-        
-
+        editingId.value = contact.id
       }
     }
     
@@ -264,6 +226,7 @@ class ACTION {
   }
 
   function fecharModal() {
+    editingId.value = null
     modal.hide()
   }
   
@@ -299,14 +262,6 @@ class ACTION {
     }
   }
 
-  // Mapeando para Option<string>
-  const countriesOp = computed(() =>
-    countries.value.map(c => ({
-      label: c.nome,  // o que aparece no dropdown
-      value: c.iso    // o que será armazenado em v-model
-    }))
-  );
-
   const checkCEP = (e: Event) => {
     const target = e.target as HTMLInputElement;
     let number = parseInt(target.value);
@@ -330,6 +285,106 @@ class ACTION {
     }
   }
 
+  const goToPreviousPage = () =>{
+    if(paginator){
+      if(paginator.value){
+        if(paginator.value.current_page!==1){
+          loadContacts(paginator.value.links[paginator.value.current_page-1]?.url ?? undefined)
+        }else{
+          loadContacts(paginator.value.last_page_url ?? undefined)
+        }
+      }
+    }
+  }
+  const goToNextPage = () =>{
+    if(paginator){
+      if(paginator.value){
+        if(paginator.value.current_page!==paginator.value.last_page){
+          loadContacts(paginator.value.links[paginator.value.current_page+1]?.url ?? undefined)
+        }else{
+          loadContacts(paginator.value.first_page_url)
+        }
+      }
+    }
+  }
+
+  function updateContactList () {
+
+    const params = new URLSearchParams();
+
+    let filters = {
+      country: filter_country.value,
+      name: filter_name.value,
+      email: filter_email.value,
+      phone: filter_phone.value,
+      cep: filter_cep.value,
+      city: filter_city.value,
+      street_address: filter_street_address.value,
+      state: filter_state.value
+    }
+
+    for (const [key, value] of Object.entries(filters)) {
+      if (value) params.append(key, value);
+    }
+    const queryString = params.toString();
+
+    loadContacts(undefined, `?${queryString}`)
+  }
+
+  async function update(id: number|null) {
+    if(id){
+      const payload = {
+        name: name.value,
+        email: email.value,
+        phone: phone.value ?? "",
+        cep: String(cep.value) ?? null,
+        country: country.value ?? "",
+        city: city.value ?? "",
+        neighborhood: neighborhood.value ?? "",
+        street_address: street_address.value ?? "",
+        house_number: house_number.value ?? "",
+        complement: complement.value ?? "",
+        picture: picture.value ?? null,
+        state: state.value ?? ""
+      }
+      
+      const response = await fetch('http://localhost:8000/api/contact/'+id, {
+        method: 'PUT',
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      
+      const contentType = response.headers.get("content-type");
+      let data = null;
+      
+      // tenta converter o corpo em JSON se for JSON mesmo
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } 
+    
+      if (!response.ok) {
+        // se o status for erro (ex: 400, 404, 500)
+        let msg = data.message;
+        
+        if(data.error.includes("name") && data.error.includes("required")){
+          msg = "O nome é obrigatório.";
+        }else if(data.error.includes("email") && data.error.includes("required")){
+          msg = "O email é obrigatório.";
+        }
+        
+        showAlert('Erro!', msg, 'error');
+        return
+      }
+
+      showAlert('Sucesso!', data.message, 'success');
+      loadContacts()
+      fecharModal();  
+    }
+  };
+
 
   onMounted(async() => {
     const collapse = document.getElementById('navbarSupportedContent')
@@ -347,10 +402,7 @@ class ACTION {
       modal = new bootstrap.Modal(modalFormEl)
     }
 
-    const response = await fetch('json/countries.json')
-    countries.value = (await response.json());
-
-    loadDefaultPicture()
+    loadDefaultPicture();
     loadContacts();
 
   })
@@ -358,9 +410,9 @@ class ACTION {
 </script>
 
 <template>
-  <section class="d-flex justify-content-center align-content-start px-15 mt-5 flex-wrap w-100" style="height: 85%;">
+  <section class="d-flex justify-content-center align-content-start px-15 pt-5 flex-wrap w-100" style="height: 100%;">
 
-    <nav id="nav-bar" class="d-flex navbar navbar-expand-lg bg-body-tertiary w-100 rounded shadow mb-3 bg-body-tertiary" style="height: 7vh;">
+    <nav id="nav-bar" class="d-flex navbar navbar-expand-lg bg-body-tertiary w-100 rounded shadow mb-3 bg-body-tertiary" style="height: 4rem;">
       <div class="container-fluid overflow-y-auto">
         <a class="navbar-brand" href="#"><img src="http://localhost:8000/favicon.ico" width="28"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -378,17 +430,79 @@ class ACTION {
     </nav>
 
     <div class="d-flex flex-wrap w-100 justify-content-center">
-      <div class="container w-100 text-center">
-        <h1>FILTROS</h1>
+      <div class="container w-100">
+        <div class="w-100 d-flex" name="filters">
+          <div name="filter1" class="w-50">
+            <div class="form-row">
+              <div class="row mb-3 me-2">
+                <div class="col-md-6">
+                  <label for="filterName" class="form-label">Nome</label>
+                  <input @input="updateContactList" type="text" class="form-control" v-model="filter_name" id="filterName" placeholder="Nome">
+                </div>
+                <div class="col-md-6">
+                  <label for="filterEmail" class="form-label">Email</label>
+                  <input @input="updateContactList" :disabled="formAction === ACTION.edit" type="email" class="form-control" v-model="filter_email" id="filterEmail" placeholder="Email">
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="row mb-3 me-2">
+                <div class="col-md-6">
+                  <label for="filterPhone" class="form-label">Telefone</label>
+                  <input @input="updateContactList" type="text" class="form-control" v-model="filter_phone" id="filterPhone" placeholder="Telefone">
+                </div>
+                <div class="col-md-6">
+                  <label for="filterCep" class="form-label">CEP</label>
+                  <input @input="updateContactList" type="number" class="form-control" v-model="filter_cep" id="filterCep" placeholder="CEP">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div name="filter2" class="w-50">
+            <div class="form-row">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="filterCountry" class="form-label">País</label>
+                  <input @input="updateContactList" type="text" class="form-control" v-model="filter_country" id="filterCountry" placeholder="País">
+                </div>
+                <div class="col-md-6">
+                    <label for="filterState" class="form-label">Estado</label>
+                    <input @input="updateContactList" type="text" class="form-control" v-model="filter_state" id="filterState" placeholder="Estado">
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="filterStreetAddress" class="form-label">Logradouro</label>
+                    <input @input="updateContactList" type="text" class="form-control" v-model="filter_street_address" id="filterStreetAddress" placeholder="Logradouro">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="filterCity" class="form-label">Cidade</label>
+                    <input @input="updateContactList" type="text" class="form-control" v-model="filter_city" id="filterCity" placeholder="Cidade">
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div v-if="!paginator?.data?.length" class="container justify-content-center align-content-start w-100 h-100 d-flex flex-wrap overflow-y-auto">
+      <PaginatorNav 
+        v-if="paginator?.data?.length && paginator?.data?.length!==0"
+        :paginator="paginator" 
+        :go-to-previous-page="goToPreviousPage"
+        :go-to-next-page="goToNextPage"
+      />
+      <div v-if="!paginator?.data" class="container justify-content-center align-content-start w-100 h-100 d-flex flex-wrap overflow-y-auto">
         <h3 class="mt-5">Carregando lista de contatos...</h3>
       </div>
-      <div class="container w-100 h-100 d-flex flex-wrap overflow-y-auto" style="max-height: 62vh;" v-if="paginator?.data?.length">
+      <div v-if="paginator?.data && paginator?.data?.length===0" class="container justify-content-center align-content-start w-100 h-100 d-flex flex-wrap overflow-y-auto">
+        <h3 class="mt-5">Nenhum contato encontrado</h3>
+      </div>
+      <div class="container w-100 d-flex flex-wrap overflow-y-auto mb-3" style="height: auto;max-height: 53vh;align-content: flex-start;" v-if="paginator?.data?.length">
         <div v-for="contact in paginator.data" :key="contact.id" class="w-100 gap-1 mb-3"> 
           <div class="card p-1 card-contact">
-            <div class="card-body d-flex gap-1">
-              <div style="width: 12rem" name="Image Contact" class="d-flex justify-content-center align-content-center">
+            <div class="card-body d-flex gap-1 wrap-small-devices">
+              <div style="width: 12rem" name="Image Contact" class="d-flex justify-content-center align-content-center img-div-small-devices">
                 <img 
                   :src="contact.picture ? contact.picture : defaultPicture ? defaultPicture : ''" 
                   alt="Imagem do contato" 
@@ -396,12 +510,12 @@ class ACTION {
                   style="border-radius: 50%;object-fit: cover; width: 10rem; min-width: 10rem;aspect-ratio: 1 / 1;"
                 />
               </div>
-              <div name="Info Contact" style="width:88%">
+              <div name="Info Contact" style="width:88%;">
                 <h5 class="card-title">{{ contact.name }}</h5>
-                <p class="mb-0">{{ contact.email }}</p>
-                <p class="mb-0">
+                <p class="mb-0">E-mail: {{ contact.email }}</p>
+                <p class="mb-0 text-wrap">
                   {{ (contact.country ? contact.country : '') + (contact.country ? ' - ':'') + 
-                    (contact.cep ? contact.cep : '') + (contact.cep ? ' - ':'') +
+                    ((contact.cep && contact.cep != null) ? ('CEP '+contact.cep) : '') + (contact.cep ? ' - ':'') +
                     (contact.state ? contact.state : '') + (contact.state ? ' - ':'') + 
                     (contact.city ? contact.city : '') + (contact.city ? ' - ':'') +
                     (contact.neighborhood ? contact.neighborhood : '') + (contact.neighborhood ? ' - ':'') +
@@ -411,10 +525,10 @@ class ACTION {
                 </p>
                 <p>
                   {{ 
-                    contact.phone ? contact.phone : '' 
+                    'Contato: '+(contact.phone ? contact.phone : '') 
                   }}
                 </p>
-                <div class="w-100 d-flex text-end justify-content-end gap-2">
+                <div class="w-100 d-flex text-end justify-content-end gap-2 adjust-justify-small-devices">
                   <a class="btn btn-secondary" @click="openModal(ACTION.edit, contact.id)">Alterar</a>
                   <a class="btn btn-danger" @click="deleteContact(contact.id)">Remover</a>
                 </div>
@@ -423,6 +537,12 @@ class ACTION {
           </div>
         </div>
       </div>
+      <PaginatorNav 
+        v-if="paginator?.data?.length && paginator?.data?.length!==0"
+        :paginator="paginator" 
+        :go-to-previous-page="goToPreviousPage"
+        :go-to-next-page="goToNextPage"
+      />
     </div>
 
     <div
@@ -448,7 +568,7 @@ class ACTION {
                   </div>
                   <div class="col-md-6">
                     <label for="formModalEmail" class="form-label">Email</label>
-                    <input :disabled="formAction === ACTION.edit" type="email" class="form-control" v-model="email" id="formModalEmail" autocomplete="email" placeholder="Email">
+                    <input type="email" class="form-control" v-model="email" id="formModalEmail" autocomplete="email" placeholder="Email">
                   </div>
                 </div>
               </div>
@@ -466,7 +586,7 @@ class ACTION {
                     <label for="formModalCountry" class="form-label">País</label>
                     <VueSelect
                       v-model="country"
-                      :options="countriesOp"
+                      :options="countries"
                       placeholder="Selecione um país"
                     />
                   </div>
@@ -516,7 +636,7 @@ class ACTION {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="fecharModal">Fechar</button>
-            <button type="button" class="btn btn-primary" @click="create">Cadastrar</button>
+            <button type="button" class="btn btn-primary" @click="formAction === 'create' ? create() : update(editingId)">{{ formAction==='create' ? 'Criar':'Editar' }}</button>
           </div>
         </div>
       </div>
@@ -546,5 +666,16 @@ class ACTION {
   .card-contact{
     background-color: #fefdff;
     width: 100% !important;
+  }
+  @media (max-width: 600px) {
+    .wrap-small-devices{
+      flex-wrap: wrap;
+    }
+    .img-div-small-devices{
+      width: 100% !important;
+    }
+    .adjust-justify-small-devices{
+      justify-content: start !important;
+    }
   }
 </style>
