@@ -33,6 +33,7 @@ class ContactFactory extends Factory
             'cep' => $this->faker->postcode(),
             'city' => $this->faker->city(),
             'country' => $this->faker->country(),
+            'state' => $this->faker->word(),
             'neighborhood' => $this->faker->word(),
             'street_address' => $this->faker->streetAddress(),
             'house_number' => $this->faker->numberBetween(1, 99999),

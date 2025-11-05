@@ -16,12 +16,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-            $table->string('cep')->nullable();
+            $table->integer('cep')->nullable();
             $table->string('city')->nullable();
             $table->string('country')->nullable();
+            $table->string('state')->nullable();
             $table->string('neighborhood')->nullable();
             $table->string('street_address')->nullable();
-            $table->string('house_number')->nullable();
+            $table->integer('house_number')->nullable();
             $table->string('complement')->nullable();
             $table->string('picture')->nullable();
             $table->timestamps();

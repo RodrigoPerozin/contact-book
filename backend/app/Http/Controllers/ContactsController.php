@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class ContactsController
 {
-    public function create($request) {
+    public function create(Request  $request) {
 
         try {
 
@@ -21,19 +21,21 @@ class ContactsController
                 'street_address' => 'nullable|string|max:255',
                 'house_number'   => 'nullable|string|max:20',
                 'complement'     => 'nullable|string|max:255',
+                'picture'       => 'nullable|string',
+                'state'         => 'nullable|string|max:100',
             ]);
 
             $contact = Contact::create($data);
 
             return response()->json([
-                'message' => 'Contact created successfully',
+                'message' => 'Contato criado com sucesso!',
                 'contact' => $contact,
             ], 201);
 
         } catch (\Throwable $th) {
 
             return response()->json([
-                'message' => 'Contact not created',
+                'message' => 'Não foi possível criar o contato',
                 'error' => $th->getMessage(),
             ], 500);
 
@@ -98,7 +100,7 @@ class ContactsController
         } catch (\Throwable $th) {
 
             return response()->json([
-                'message' => 'Contact not found',
+                'message' => 'Não foi possível buscar o(s) contato(s)',
                 'error' => $th->getMessage()
             ],500);
 
@@ -120,7 +122,7 @@ class ContactsController
         } catch (\Throwable $th) {
 
             return response()->json([
-                'message' => 'Error deleting contact',
+                'message' => 'Erro ao deletar o contato',
                 'error' => $th->getMessage()
             ],500);
 
@@ -152,14 +154,14 @@ class ContactsController
             $contact->update($data);
 
             return response()->json([
-                'message' => 'Contact updated successfully',
+                'message' => 'Contato atualizado com sucesso!',
                 'contact' => $contact,
             ], 200);
 
         } catch (\Throwable $th) {
 
             return response()->json([
-                'message' => 'Error updating contact',
+                'message' => 'Erro ao atualizar o contato',
                 'error' => $th->getMessage()
             ],500);
 
@@ -172,7 +174,7 @@ class ContactsController
         
         if (!file_exists($path)) {
             return response()->json([
-                'error' => 'Default image not found.'
+                'error' => 'Imagem padrão não encontrada.'
             ], 404);
         } 
 
@@ -181,7 +183,7 @@ class ContactsController
         $base64KB = round($base64Bytes / 1024, 2);
         
         return response()->json([
-            'image' => $defaultImage,
+            'image' => 'data:image/png;base64,' . $defaultImage,
             'size_in_kb' => $base64KB
         ], 200);
     }
