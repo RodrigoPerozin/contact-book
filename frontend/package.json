@@ -12,6 +12,7 @@
     "bootstrap": "^5.3.8",
     "sweetalert2": "^11.26.3",
     "vue": "^3.5.22",
+    "vue-router": "^4.6.3",
     "vue3-select-component": "^0.14.0"
   },
   "devDependencies": {
